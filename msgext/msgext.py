@@ -5,32 +5,62 @@ import sys
 import argparse
 import os
 
+base_path = 'workspace' #base folder location, defaults to 'workspace' in working directory 
+
+def mkdir(string):
+    direct = base_path
+    direct_arr = string.split('/')
+
+    for i in direct_arr:
+        direct = (direct + '/' + i)
+        if i in direct_arr[:-1]:
+            try:
+                os.mkdir(direct)
+                print('Created: ' + direct)
+            except FileExistsError:
+                print('INFO: Workspace already exists')
+    return(direct)
+
+
 def main():
 
-    base_path = 'pkg'
-    os.mkdir(base_path) 
+    try:
+        os.mkdir(base_path)
+    except FileExistsError:
+        print('INFO: Workspace already exists')
+     
     types = {}
 
     for bagname in sys.argv[1:]:
         bag = rosbag.Bag(bagname)
         for topic, msg, t in bag.read_messages():
             types[msg._type] = msg._full_text 
-    with open(bagname + '_msg_types.txt', 'w') as f:
-        # sys.stdout = f
-        for t in types:
-            direct = base_path
-            direct_arr = t.split('/')
-            #print (direct_arr)
-            for i in direct_arr:
-                direct = (direct + '/' + i)
-                try:
-                    os.mkdir(direct)
-                except FileExistsError:
-                    print()
-                
+
+    for t in types:
+        direct = mkdir(t)
+        f = open(direct + '.msg', 'w+')
+        lines = types[t].split('MSG: ',-1)
+        first = True
+        for x in lines:
+            if first:
+                f.write(x)
+                first = False
+                f.close()
+            else:
+                sublines = x.split('\n',-1)
+                path = sublines[0].strip('MSG: ')
+                print('Sub-def ^')
+                subtype = mkdir(path)
+                f = open(subtype + '.msg', 'w+')
+                first2 = True
+                for i in sublines:
+                    if(first2):
+                        first2 = False
+                    else:
+                         f.write(i + '\n')
+                f.close()
+      
+      
 
 
-            # print ("Message type:", t)
-            # print ("Message text:")
-            # print (types[t])
-            # print ()
+    
