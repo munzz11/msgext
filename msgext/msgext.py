@@ -18,7 +18,7 @@ def mkdir(string):
                 os.mkdir(direct)
                 print('Created: ' + direct)
             except FileExistsError:
-                print('INFO: Workspace already exists')
+                print(' ')
     return(direct)
 
 
@@ -37,6 +37,14 @@ def main():
             types[msg._type] = msg._full_text 
 
     for t in types:
+
+        # Print msg def to std out first #
+        print ("Message type:", t)
+        print ("Message text:")
+        print (types[t])
+        print ()
+        ##################################
+        
         direct = mkdir(t)
         f = open(direct + '.msg', 'w+')
         lines = types[t].split('MSG: ',-1)
@@ -49,7 +57,7 @@ def main():
             else:
                 sublines = x.split('\n',-1)
                 path = sublines[0].strip('MSG: ')
-                print('Sub-def ^')
+                
                 subtype = mkdir(path)
                 f = open(subtype + '.msg', 'w+')
                 first2 = True
